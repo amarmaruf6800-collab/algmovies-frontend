@@ -28,7 +28,6 @@ function Home() {
     try {
       if (pageNumber > 1) setIsLoadingMore(true);
       const response = await axios.get(`https://algmovies-backend.vercel.app/api/movies?page=${pageNumber}&limit=3`);
-
       if (pageNumber === 1) setMovies(response.data.data);
       else setMovies((prev) => [...prev, ...response.data.data]);
 
