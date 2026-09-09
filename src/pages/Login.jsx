@@ -14,12 +14,12 @@ function Login() {
         setMessage('');
         try {
             if (isRegisterMode) {
-                await axios.post('https://darkish-squeeze-smirk.ngrok-free.dev//api/auth/register-user', { username, password });
-                setMessage('Account created successfully! Please Login.');
+                await axios.post('https://darkish-squeeze-smirk.ngrok-free.dev/api/auth/register-user', { username, password });
+                setMessage('Akun berhasil dibuat! Silakan Login.');
                 setIsRegisterMode(false);
                 setUsername(''); setPassword('');
             } else {
-                const response = await axios.post('https://darkish-squeeze-smirk.ngrok-free.dev//api/auth/login', { username, password });
+                const response = await axios.post('https://darkish-squeeze-smirk.ngrok-free.dev/api/auth/login', { username, password });
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('role', response.data.role);
 
@@ -27,7 +27,7 @@ function Login() {
                 else navigate('/');
             }
         } catch (error) {
-            setMessage(error.response?.data?.message || 'An error occurred! Try again.');
+            setMessage(error.response?.data?.message || 'Terjadi kesalahan! Coba lagi.');
         }
     };
 
@@ -39,10 +39,10 @@ function Login() {
 
                 <h1 style={{ color: theme.primary, textAlign: 'center', margin: '0 0 10px 0', fontSize: '32px', fontWeight: '900', letterSpacing: '1px' }}>ALGMOVIES</h1>
                 <h2 style={{ textAlign: 'center', marginBottom: '30px', color: theme.textMuted, fontSize: '16px', fontWeight: 'normal' }}>
-                    {isRegisterMode ? 'Create Viewer Account' : 'Login to Your Account'}
+                    {isRegisterMode ? 'Buat Akun Penonton' : 'Masuk ke Akun Anda'}
                 </h2>
 
-                {message && <p style={{ backgroundColor: message.includes('successfully') ? 'rgba(29, 185, 84, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: message.includes('successfully') ? theme.primary : '#ef4444', padding: '12px', borderRadius: '8px', fontSize: '14px', textAlign: 'center', border: `1px solid ${message.includes('successfully') ? theme.primary : '#ef4444'}` }}>{message}</p>}
+                {message && <p style={{ backgroundColor: message.includes('berhasil') ? 'rgba(29, 185, 84, 0.1)' : 'rgba(239, 68, 68, 0.1)', color: message.includes('berhasil') ? theme.primary : '#ef4444', padding: '12px', borderRadius: '8px', fontSize: '14px', textAlign: 'center', border: `1px solid ${message.includes('berhasil') ? theme.primary : '#ef4444'}` }}>{message}</p>}
 
                 <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px' }}>
                     <input
@@ -54,14 +54,14 @@ function Login() {
                         style={{ padding: '15px', backgroundColor: theme.bgMain, color: theme.textMain, border: '1px solid #374151', borderRadius: '8px', fontSize: '16px', outline: 'none' }}
                     />
                     <button type="submit" style={{ backgroundColor: theme.primary, color: '#000', padding: '15px', border: 'none', borderRadius: '8px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }}>
-                        {isRegisterMode ? 'Sign Up Now' : 'Login'}
+                        {isRegisterMode ? 'Daftar Sekarang' : 'Masuk'}
                     </button>
                 </form>
 
                 <p style={{ marginTop: '30px', color: theme.textMuted, textAlign: 'center', fontSize: '14px' }}>
-                    {isRegisterMode ? 'Already have an account? ' : 'New to ALGMOVIES? '}
+                    {isRegisterMode ? 'Sudah punya akun? ' : 'Baru di ALGMOVIES? '}
                     <span onClick={() => { setIsRegisterMode(!isRegisterMode); setMessage(''); }} style={{ color: theme.primary, cursor: 'pointer', fontWeight: 'bold' }}>
-                        {isRegisterMode ? 'Login here.' : 'Sign up now.'}
+                        {isRegisterMode ? 'Login di sini.' : 'Daftar sekarang.'}
                     </span>
                 </p>
             </div>
