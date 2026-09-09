@@ -14,12 +14,12 @@ function Login() {
         setMessage('');
         try {
             if (isRegisterMode) {
-                await axios.post('https://darkish-squeeze-smirk.ngrok-free.dev/api/auth/register-user', { username, password });
+                await axios.post('https://algmovies-backend.vercel.app/api/auth/register-user', { username, password });
                 setMessage('Akun berhasil dibuat! Silakan Login.');
                 setIsRegisterMode(false);
                 setUsername(''); setPassword('');
             } else {
-                const response = await axios.post('https://darkish-squeeze-smirk.ngrok-free.dev/api/auth/login', { username, password });
+                const response = await axios.post('https://algmovies-backend.vercel.app/api/auth/login', { username, password });
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('role', response.data.role);
 
