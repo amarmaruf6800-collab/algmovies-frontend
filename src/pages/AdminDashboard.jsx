@@ -35,7 +35,7 @@ function AdminDashboard() {
 
     const fetchMovies = async () => {
         try {
-            const response = await axios.get('https://algmovies-backend.vercel.app/api/movies');
+            const response = await axios.get('/api/movies');
             setMovies(response.data.data);
         } catch (error) {
             console.error("Failed to load data:", error);
@@ -57,7 +57,7 @@ function AdminDashboard() {
     const handleDelete = async (id) => {
         if (window.confirm('Permanently delete this movie from the database?')) {
             try {
-                await axios.delete(`https://algmovies-backend.vercel.app/api/movies/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.delete(`/api/movies/${id}`, { headers: { Authorization: `Bearer ${token}` } });
                 fetchMovies();
             } catch (error) { alert('Failed to delete data.'); }
         }
@@ -75,10 +75,10 @@ function AdminDashboard() {
 
         try {
             if (editId) {
-                await axios.put(`https://algmovies-backend.vercel.app/api/movies/${editId}`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+                await axios.put(`/api/movies/${editId}`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
                 alert('Movie updated!'); setEditId(null);
             } else {
-                await axios.post('https://algmovies-backend.vercel.app/api/movies', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+                await axios.post('/api/movies', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
                 alert('Movie added!');
             }
             resetForm();

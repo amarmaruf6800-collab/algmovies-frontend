@@ -27,7 +27,7 @@ function Home() {
   const getMovies = async (pageNumber = 1) => {
     try {
       if (pageNumber > 1) setIsLoadingMore(true);
-      const response = await axios.get(`https://algmovies-backend.vercel.app/api/movies?page=${pageNumber}&limit=3`);
+      const response = await axios.get(`/api/movies?page=${pageNumber}&limit=3`);
       if (pageNumber === 1) setMovies(response.data.data);
       else setMovies((prev) => [...prev, ...response.data.data]);
 
@@ -47,7 +47,7 @@ function Home() {
     setSelectedGenre('All');
     if (!searchQuery) return getMovies(1);
     try {
-      const response = await axios.get(`https://algmovies-backend.vercel.app/api/movies/search?q=${searchQuery}`);
+      const response = await axios.get(`/api/movies/search?q=${searchQuery}`);
       setMovies(response.data.data);
       setHasNextPage(false);
     } catch (error) { console.error(error); }
@@ -63,7 +63,7 @@ function Home() {
       getMovies(1);
     } else {
       try {
-        const response = await axios.get(`https://algmovies-backend.vercel.app/api/movies/search?q=${g}`);
+        const response = await axios.get(`/api/movies/search?q=${g}`);
         setMovies(response.data.data);
         setHasNextPage(false);
       } catch (error) { console.error(error); }
@@ -72,21 +72,21 @@ function Home() {
 
   const fetchWatchlist = async () => {
     try {
-      const response = await axios.get('https://algmovies-backend.vercel.app/api/watchlist', { headers: { Authorization: `Bearer ${token}` } });
+      const response = await axios.get('/api/watchlist', { headers: { Authorization: `Bearer ${token}` } });
       setWatchlist(response.data.data);
     } catch (error) { }
   };
 
   const handleAddWatchlist = async (movieId) => {
     try {
-      await axios.post('https://algmovies-backend.vercel.app/api/watchlist', { movieId }, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.post('/api/watchlist', { movieId }, { headers: { Authorization: `Bearer ${token}` } });
       fetchWatchlist();
     } catch (error) { alert('Failed to add to watchlist'); }
   };
 
   const handleRemoveWatchlist = async (watchlistId) => {
     try {
-      await axios.delete(`https://algmovies-backend.vercel.app/api/watchlist/${watchlistId}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`/api/watchlist/${watchlistId}`, { headers: { Authorization: `Bearer ${token}` } });
       fetchWatchlist();
     } catch (error) { }
   };

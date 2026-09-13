@@ -10,7 +10,7 @@ function MovieDetail() {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
-        const response = await axios.get(`https://algmovies-backend.vercel.app/api/movies/${id}`);
+        const response = await axios.get(`/api/movies/${id}`);
         setMovie(response.data.data);
         setLoading(false);
       } catch (error) {
