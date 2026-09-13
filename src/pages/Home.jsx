@@ -79,9 +79,13 @@ function Home() {
 
   const handleAddWatchlist = async (movieId) => {
     try {
-      await axios.post('/api/watchlist', { movieId }, { headers: { Authorization: `Bearer ${token}` } });
+      // Mengirimkan format movieId dan movie_id sekaligus agar backend tidak salah tangkap
+      await axios.post('/api/watchlist', { movieId: movieId, movie_id: movieId }, { headers: { Authorization: `Bearer ${token}` } });
       fetchWatchlist();
-    } catch (error) { alert('Failed to add to watchlist'); }
+    } catch (error) {
+      console.error(error);
+      alert('Failed to add to watchlist');
+    }
   };
 
   const handleRemoveWatchlist = async (watchlistId) => {
@@ -621,11 +625,18 @@ function Home() {
             }}
           >
             {displayMovies.map((movie) => {
-              const watchlistData = watchlist.find((w) => w.id === movie.id);
+              // Menangkap ID film dengan tangguh (mengantisipasi kolom id atau movie_id)
+              const currentMovieId = movie.id || movie.movie_id;
+
+              // Mencocokkan dengan data watchlist secara akurat
+              const watchlistData = watchlist.find((w) => w.id === currentMovieId || w.movie_id === currentMovieId);
               const isInWatchlist = !!watchlistData;
 
+              // Menangkap ID valid untuk proses hapus
+              const validWatchlistId = watchlistData ? (watchlistData.watchlist_id || watchlistData.id) : null;
+
               return (
-                <div key={movie.id} className="premium-card">
+                <div key={currentMovieId} className="premium-card">
                   {/* POSTER */}
                   <div style={{ position: 'relative', height: '380px', overflow: 'hidden' }}>
                     {movie.foto ? (
@@ -677,7 +688,7 @@ function Home() {
 
                     {/* PLAY OVERLAY */}
                     <Link
-                      to={`/movie/${movie.id}`}
+                      to={`/movie/${currentMovieId}`}
                       className="play-overlay"
                       style={{
                         position: 'absolute',
@@ -746,8 +757,8 @@ function Home() {
                         <button
                           onClick={() =>
                             isInWatchlist
-                              ? handleRemoveWatchlist(watchlistData.watchlist_id)
-                              : handleAddWatchlist(movie.id)
+                              ? handleRemoveWatchlist(validWatchlistId)
+                              : handleAddWatchlist(currentMovieId)
                           }
                           style={{
                             background: isInWatchlist ? 'transparent' : 'rgba(255,255,255,0.05)',
@@ -782,7 +793,7 @@ function Home() {
                         </button>
                       ) : (
                         <Link
-                          to={`/movie/${movie.id}`}
+                          to={`/movie/${currentMovieId}`}
                           style={{
                             display: 'block',
                             background: 'rgba(255,255,255,0.05)',
