@@ -72,27 +72,42 @@ function Home() {
 
   const fetchWatchlist = async () => {
     try {
-      const response = await axios.get('/api/watchlist', { headers: { Authorization: `Bearer ${token}` } });
+      // Tambahkan ?t=... (Anti-Cache) agar Vercel selalu mengambil data terbaru dari VPS BiznetGio, bukan data usang
+      const response = await axios.get(`/api/watchlist?t=${new Date().getTime()}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setWatchlist(response.data.data);
-    } catch (error) { }
+    } catch (error) {
+      console.error("Gagal mengambil watchlist:", error);
+    }
   };
 
   const handleAddWatchlist = async (movieId) => {
     try {
-      // Mengirimkan format movieId dan movie_id sekaligus agar backend tidak salah tangkap
-      await axios.post('/api/watchlist', { movieId: movieId, movie_id: movieId }, { headers: { Authorization: `Bearer ${token}` } });
+      // Mengirim berbagai format ID sekaligus untuk memastikan backend menerimanya
+      await axios.post('/api/watchlist',
+        { movieId: movieId, movie_id: movieId, id: movieId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // Jika sukses, panggil ulang data terbaru
       fetchWatchlist();
     } catch (error) {
-      console.error(error);
-      alert('Failed to add to watchlist');
+      console.error("Error Add Watchlist:", error.response);
+      // Ini akan memunculkan pop-up yang memberitahu persis APA alasan backend menolaknya
+      const pesanError = error.response?.data?.message || error.response?.data?.error || 'Koneksi ke VPS gagal';
+      alert(`Gagal menambah: ${pesanError}`);
     }
   };
 
   const handleRemoveWatchlist = async (watchlistId) => {
     try {
-      await axios.delete(`/api/watchlist/${watchlistId}`, { headers: { Authorization: `Bearer ${token}` } });
+      await axios.delete(`/api/watchlist/${watchlistId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       fetchWatchlist();
-    } catch (error) { }
+    } catch (error) {
+      console.error("Error Remove Watchlist:", error.response);
+    }
   };
 
   const handleLogout = () => {
