@@ -1,375 +1,219 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
+import { useNavigate, Link } from 'react-router-dom';
 
-function MovieDetail() {
-  const { id } = useParams();
-  const [movie, setMovie] = useState(null);
-  const [loading, setLoading] = useState(true);
+function AdminDashboard() {
+    const [movies, setMovies] = useState([]);
 
-  useEffect(() => {
-    const fetchMovie = async () => {
-      try {
-        const response = await axios.get(`/api/movies/${id}`);
-        setMovie(response.data.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Failed to fetch movie data:", error);
-        setLoading(false);
-      }
+    // Form State
+    const [judul, setJudul] = useState('');
+    const [tahun, setTahun] = useState('');
+    const [sutradara, setSutradara] = useState('');
+    const [deskripsi, setDeskripsi] = useState('');
+    const [genre, setGenre] = useState('');
+    const [trailerUrl, setTrailerUrl] = useState('');
+
+    // Image Specific State (Two Options)
+    const [image, setImage] = useState(null); // For local file
+    const [imageUrl, setImageUrl] = useState(''); // For Google link
+
+    const [editId, setEditId] = useState(null);
+
+    const navigate = useNavigate();
+    const token = localStorage.getItem('token');
+
+    // Automatic Genre Category List
+    const genreOptions = [
+        "Action", "Drama", "Romance", "Horror", "Sci-Fi",
+        "Comedy", "Thriller", "Fantasy", "Documentary", "Animation", "Mystery", "Crime"
+    ];
+
+    useEffect(() => {
+        if (!token) navigate('/login');
+        else fetchMovies();
+    }, [token, navigate]);
+
+    const fetchMovies = async () => {
+        try {
+            const response = await axios.get('/api/movies');
+            setMovies(response.data.data);
+        } catch (error) {
+            console.error("Failed to load data:", error);
+        }
     };
-    fetchMovie();
-  }, [id]);
 
-  const getYouTubeEmbedUrl = (url) => {
-    if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}?autoplay=1` : null;
-  };
+    const handleEdit = (movie) => {
+        setJudul(movie.judul); setTahun(movie.tahun); setSutradara(movie.sutradara);
+        setDeskripsi(movie.deskripsi || ''); setGenre(movie.genre || ''); setTrailerUrl(movie.trailer_url || '');
+        setEditId(movie.id);
 
-  // Premium theme aligned with Home.jsx
-  const theme = {
-    bgMain: '#0a0e1a',
-    bgCard: 'rgba(255,255,255,0.04)',
-    bgCardSolid: '#141b2b',
-    primary: '#00e676',
-    primaryDim: 'rgba(0, 230, 118, 0.15)',
-    textMain: '#f1f5f9',
-    textMuted: '#94a3b8',
-    borderLight: 'rgba(255,255,255,0.06)',
-    glassBg: 'rgba(10, 14, 26, 0.75)',
-  };
+        // Reset image form when editing
+        setImage(null);
+        setImageUrl('');
 
-  if (loading) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDelete = async (id) => {
+        if (window.confirm('Permanently delete this movie from the database?')) {
+            try {
+                await axios.delete(`/api/movies/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+                fetchMovies();
+            } catch (error) { alert('Failed to delete data.'); }
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.append('judul', judul); formData.append('tahun', tahun); formData.append('sutradara', sutradara);
+        formData.append('deskripsi', deskripsi); formData.append('genre', genre); formData.append('trailer_url', trailerUrl);
+
+        // Send image (File or URL)
+        if (image) formData.append('image', image);
+        if (imageUrl) formData.append('imageUrl', imageUrl);
+
+        try {
+            if (editId) {
+                await axios.put(`/api/movies/${editId}`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+                alert('Movie updated!'); setEditId(null);
+            } else {
+                await axios.post('/api/movies', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+                alert('Movie added!');
+            }
+            resetForm();
+            fetchMovies();
+        } catch (error) { alert('An error occurred while saving data.'); }
+    };
+
+    const resetForm = () => {
+        setJudul(''); setTahun(''); setSutradara(''); setDeskripsi('');
+        setGenre(''); setTrailerUrl(''); setImage(null); setImageUrl(''); setEditId(null);
+    };
+
+    const handleLogout = () => {
+        localStorage.removeItem('token'); localStorage.removeItem('role'); navigate('/');
+    };
+
+    const theme = { bgMain: '#0b0f19', bgCard: '#151b2b', primary: '#1db954', textMain: '#ffffff', textMuted: '#94a3b8', border: '#1f2937' };
+    const inputStyle = { width: '100%', padding: '12px', boxSizing: 'border-box', backgroundColor: theme.bgMain, color: theme.textMain, border: `1px solid ${theme.border}`, borderRadius: '6px', outline: 'none' };
+
     return (
-      <div
-        style={{
-          backgroundColor: theme.bgMain,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: theme.primary,
-          fontFamily: "'Inter', sans-serif",
-          fontSize: '18px',
-          fontWeight: 600,
-          letterSpacing: '1px',
-        }}
-      >
-        <span style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>PREPARING THEATER...</span>
-        <style>{`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-          }
-        `}</style>
-      </div>
-    );
-  }
+        <div style={{ backgroundColor: theme.bgMain, minHeight: '100vh', color: theme.textMain, fontFamily: "'Inter', sans-serif" }}>
 
-  if (!movie) {
-    return (
-      <div
-        style={{
-          backgroundColor: theme.bgMain,
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#ef4444',
-          fontFamily: "'Inter', sans-serif",
-          fontSize: '20px',
-          fontWeight: 500,
-        }}
-      >
-        Movie Not Found
-      </div>
-    );
-  }
+            {/* Top Navbar Dashboard */}
+            <div style={{ backgroundColor: theme.bgCard, padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${theme.border}` }}>
+                <h2 style={{ margin: 0, color: theme.primary, letterSpacing: '1px' }}>ALGMOVIES <span style={{ color: theme.textMain, fontSize: '18px', fontWeight: 'normal' }}>| CMS</span></h2>
+                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                    <Link to="/" style={{ color: theme.textMuted, textDecoration: 'none', fontWeight: 'bold' }}>View Public Website</Link>
+                    <button onClick={handleLogout} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold' }}>Logout</button>
+                </div>
+            </div>
 
-  return (
-    <div
-      style={{
-        backgroundColor: theme.bgMain,
-        minHeight: '100vh',
-        color: theme.textMain,
-        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-        display: 'flex',
-        flexDirection: 'column',
-        WebkitFontSmoothing: 'antialiased',
-      }}
-    >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap');
+            <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
+                {/* Form Panel */}
+                <div style={{ backgroundColor: theme.bgCard, padding: '30px', borderRadius: '12px', border: `1px solid ${theme.border}`, marginBottom: '40px' }}>
+                    <h3 style={{ marginTop: 0, color: theme.primary }}>{editId ? `✏️ Edit Film ID: ${editId}` : '➕ Add New Movie Catalog'}</h3>
+                    <form onSubmit={handleSubmit}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '15px' }}>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>Movie Title</label>
+                                <input type="text" value={judul} onChange={(e) => setJudul(e.target.value)} required style={inputStyle} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>Select Genre Category</label>
+                                {/* GENRE DROPDOWN CODE */}
+                                <select value={genre} onChange={(e) => setGenre(e.target.value)} required style={inputStyle}>
+                                    <option value="" disabled>-- Select Genre --</option>
+                                    {genreOptions.map((g, index) => (
+                                        <option key={index} value={g}>{g}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>Release Year</label>
+                                <input type="number" value={tahun} onChange={(e) => setTahun(e.target.value)} required style={inputStyle} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>Director</label>
+                                <input type="text" value={sutradara} onChange={(e) => setSutradara(e.target.value)} required style={inputStyle} />
+                            </div>
+                        </div>
 
-        .back-btn {
-          display: inline-flex;
-          align-items: center;
-          gap: 8px;
-          color: ${theme.textMuted};
-          text-decoration: none;
-          font-weight: 500;
-          font-size: 14px;
-          padding: 8px 16px 8px 12px;
-          border-radius: 40px;
-          border: 1px solid transparent;
-          transition: all 0.25s ease;
-        }
-        .back-btn:hover {
-          color: ${theme.textMain};
-          border-color: ${theme.borderLight};
-          background: rgba(255,255,255,0.04);
-          transform: translateX(-4px);
-        }
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>YouTube Trailer Link</label>
+                            <input type="text" placeholder="https://www.youtube.com/watch?v=..." value={trailerUrl} onChange={(e) => setTrailerUrl(e.target.value)} style={inputStyle} />
+                        </div>
 
-        .logo-link {
-          text-decoration: none;
-          transition: all 0.3s ease;
-          display: inline-block;
-        }
-        .logo-link:hover {
-          transform: scale(1.02);
-          text-shadow: 0 0 30px ${theme.primary}60;
-        }
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>Full Synopsis</label>
+                            <textarea rows="3" value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} style={{ ...inputStyle, resize: 'vertical' }}></textarea>
+                        </div>
 
-        .video-frame {
-          border-radius: 20px;
-          overflow: hidden;
-          box-shadow: 0 20px 60px -20px rgba(0, 230, 118, 0.2);
-          border: 1px solid ${theme.borderLight};
-          aspect-ratio: 16 / 9;
-          background: #000;
-          transition: box-shadow 0.4s ease;
-        }
-        .video-frame:hover {
-          box-shadow: 0 30px 80px -20px rgba(0, 230, 118, 0.3);
-        }
+                        {/* DUAL IMAGE SOURCE CODE */}
+                        <div style={{ backgroundColor: '#1e293b', padding: '20px', borderRadius: '8px', border: `1px solid ${theme.border}`, marginBottom: '25px' }}>
+                            <label style={{ display: 'block', marginBottom: '15px', color: '#fff', fontWeight: 'bold' }}>🖼️ Poster Image Source (Fill One Only)</label>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '8px', color: theme.primary, fontSize: '14px' }}>Option 1: Upload from Laptop/PC</label>
+                                    <input type="file" onChange={(e) => { setImage(e.target.files[0]); setImageUrl(''); }} style={{ color: theme.textMuted }} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', marginBottom: '8px', color: theme.primary, fontSize: '14px' }}>Option 2: Paste Web Image URL (Google/IMDb)</label>
+                                    <input type="text" placeholder="https://example.com/poster.jpg" value={imageUrl} onChange={(e) => { setImageUrl(e.target.value); setImage(null); }} style={inputStyle} />
+                                </div>
+                            </div>
+                        </div>
 
-        .info-card {
-          background: ${theme.bgCard};
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border: 1px solid ${theme.borderLight};
-          border-radius: 20px;
-          padding: 32px;
-          box-shadow: 0 10px 30px -10px rgba(0,0,0,0.4);
-          transition: border-color 0.3s ease;
-        }
-        .info-card:hover {
-          border-color: ${theme.primary}40;
-        }
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <button type="submit" style={{ backgroundColor: theme.primary, color: '#000', border: 'none', padding: '12px 25px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                {editId ? 'Save Changes' : 'Publish Movie'}
+                            </button>
+                            {editId && (
+                                <button type="button" onClick={resetForm} style={{ backgroundColor: 'transparent', color: theme.textMain, border: `1px solid ${theme.border}`, padding: '12px 25px', borderRadius: '6px', cursor: 'pointer' }}>
+                                    Cancel
+                                </button>
+                            )}
+                        </div>
+                    </form>
+                </div>
 
-        .badge-match {
-          background: ${theme.primaryDim};
-          color: ${theme.primary};
-          padding: 4px 14px;
-          border-radius: 40px;
-          font-weight: 700;
-          font-size: 13px;
-          border: 1px solid ${theme.primary}30;
-        }
+                {/* Data Table Management */}
+                <div style={{ backgroundColor: theme.bgCard, padding: '30px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
+                    <h3 style={{ marginTop: 0, color: theme.textMain }}>Total Database Catalog ({movies.length} Movies)</h3>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
+                        <thead>
+                            <tr style={{ backgroundColor: '#1f2937', textAlign: 'left' }}>
+                                <th style={{ padding: '15px', borderRadius: '8px 0 0 0' }}>Poster</th>
+                                <th style={{ padding: '15px' }}>Title</th>
+                                <th style={{ padding: '15px' }}>Category</th>
+                                <th style={{ padding: '15px' }}>Year</th>
+                                <th style={{ padding: '15px', textAlign: 'center', borderRadius: '0 8px 0 0' }}>Management Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {movies.map((m) => (
+                                <tr key={m.id} style={{ borderBottom: `1px solid ${theme.border}` }}>
+                                    <td style={{ padding: '15px' }}>
+                                        {m.foto ? <img src={m.foto} alt="" style={{ width: '50px', height: '70px', objectFit: 'cover', borderRadius: '6px' }} /> : 'No Image'}
+                                    </td>
+                                    <td style={{ padding: '15px', fontWeight: 'bold' }}>{m.judul}</td>
+                                    <td style={{ padding: '15px' }}><span style={{ backgroundColor: '#374151', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>{m.genre}</span></td>
+                                    <td style={{ padding: '15px', color: theme.textMuted }}>{m.tahun}</td>
+                                    <td style={{ padding: '15px', textAlign: 'center' }}>
+                                        <button onClick={() => handleEdit(m)} style={{ backgroundColor: '#f59e0b', color: '#000', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', marginRight: '8px', fontWeight: 'bold' }}>Edit</button>
+                                        <button onClick={() => handleDelete(m.id)} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
 
-        .badge-4k {
-          border: 1px solid ${theme.textMuted}50;
-          padding: 2px 12px;
-          border-radius: 4px;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.5px;
-          color: ${theme.textMuted};
-        }
-
-        .genre-tag {
-          background: ${theme.bgCard};
-          color: ${theme.textMain};
-          padding: 6px 18px;
-          border-radius: 40px;
-          font-size: 13px;
-          border: 1px solid ${theme.borderLight};
-        }
-
-        .share-btn {
-          width: 100%;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid ${theme.borderLight};
-          color: ${theme.textMain};
-          padding: 14px;
-          border-radius: 12px;
-          cursor: pointer;
-          font-weight: 600;
-          font-size: 14px;
-          transition: all 0.25s ease;
-        }
-        .share-btn:hover {
-          background: rgba(255,255,255,0.08);
-          border-color: ${theme.primary}40;
-          color: ${theme.primary};
-        }
-
-        .nav-blur {
-          backdrop-filter: blur(16px);
-          -webkit-backdrop-filter: blur(16px);
-          background: ${theme.glassBg};
-          border-bottom: 1px solid ${theme.borderLight};
-          padding: 16px 40px;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          position: sticky;
-          top: 0;
-          z-index: 50;
-        }
-
-        .section-title {
-          font-size: clamp(36px, 5vw, 56px);
-          margin: 0 0 12px 0;
-          font-weight: 900;
-          letter-spacing: -1.5px;
-          line-height: 1.05;
-          color: #fff;
-        }
-
-        .synopsis {
-          font-size: clamp(16px, 1.2vw, 19px);
-          line-height: 1.8;
-          color: #cbd5e1;
-          max-width: 700px;
-        }
-
-        @media (max-width: 768px) {
-          .nav-blur { padding: 12px 20px; flex-wrap: wrap; gap: 10px; }
-          .back-btn { font-size: 13px; padding: 6px 12px; }
-          .logo-link { font-size: 22px !important; }
-          .info-card { padding: 24px; }
-        }
-      `}</style>
-
-      {/* NAVBAR */}
-      <div className="nav-blur">
-        <Link to="/" className="back-btn">
-          <span style={{ fontSize: '20px', lineHeight: 1 }}>←</span> Back
-        </Link>
-
-        <Link to="/" className="logo-link" style={{ color: theme.primary, fontSize: '28px', fontWeight: 900, letterSpacing: '-0.5px', textShadow: `0 0 20px ${theme.primary}30` }}>
-          ALGMOVIES
-        </Link>
-
-        <div style={{ width: '120px' }}></div> {/* Spacer for balance */}
-      </div>
-
-      {/* VIDEO FRAME */}
-      <div style={{ padding: '32px 40px 20px', backgroundColor: '#05080f' }}>
-        <div className="video-frame" style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          {movie.trailer_url ? (
-            <iframe
-              width="100%"
-              height="100%"
-              src={getYouTubeEmbedUrl(movie.trailer_url)}
-              title={movie.judul}
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={{ display: 'block' }}
-            />
-          ) : (
-            <img
-              src={movie.foto}
-              alt={movie.judul}
-              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            />
-          )}
+            </div>
         </div>
-      </div>
-
-      {/* DETAIL INFO */}
-      <div
-        style={{
-          padding: '20px 40px 60px',
-          maxWidth: '1200px',
-          margin: '0 auto',
-          width: '100%',
-          boxSizing: 'border-box',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexWrap: 'wrap',
-            gap: '40px',
-            alignItems: 'flex-start',
-          }}
-        >
-          {/* LEFT: Title & Synopsis */}
-          <div style={{ flex: '2 1 600px' }}>
-            <h1 className="section-title">{movie.judul}</h1>
-
-            <div
-              style={{
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: '12px 20px',
-                alignItems: 'center',
-                marginBottom: '28px',
-                fontSize: '15px',
-                color: theme.textMuted,
-              }}
-            >
-              <span className="badge-match">99% Match</span>
-              <span>{movie.tahun}</span>
-              <span className="badge-4k">4K ULTRA HD</span>
-              <span className="genre-tag">{movie.genre}</span>
-            </div>
-
-            <p className="synopsis">
-              {movie.deskripsi ||
-                'No synopsis information available for this title. Watch the trailer to get a glimpse of the story.'}
-            </p>
-          </div>
-
-          {/* RIGHT: Crew Info */}
-          <div className="info-card" style={{ flex: '1 1 280px' }}>
-            <h3
-              style={{
-                color: theme.textMain,
-                marginTop: 0,
-                marginBottom: '24px',
-                paddingBottom: '16px',
-                borderBottom: `1px solid ${theme.borderLight}`,
-                fontSize: '18px',
-                fontWeight: 700,
-                letterSpacing: '-0.3px',
-              }}
-            >
-              Crew & Info
-            </h3>
-
-            <div style={{ marginBottom: '20px' }}>
-              <div style={{ color: theme.textMuted, fontSize: '13px', fontWeight: 500, marginBottom: '4px' }}>
-                Director
-              </div>
-              <div style={{ color: '#fff', fontSize: '16px', fontWeight: 600 }}>
-                {movie.sutradara || '—'}
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '28px' }}>
-              <div style={{ color: theme.textMuted, fontSize: '13px', fontWeight: 500, marginBottom: '4px' }}>
-                Distributor
-              </div>
-              <div style={{ color: theme.primary, fontSize: '16px', fontWeight: 600 }}>
-                ALGMOVIES Network
-              </div>
-            </div>
-
-            <button className="share-btn">Share Movie</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
 }
 
-export default MovieDetail;
+export default AdminDashboard;
