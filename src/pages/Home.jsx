@@ -72,25 +72,25 @@ function Home() {
 
   const fetchWatchlist = async () => {
     try {
-      // Tambahkan ?t=... (Anti-Cache) agar Vercel selalu mengambil data terbaru dari VPS BiznetGio, bukan data usang
       const response = await axios.get(`/api/watchlist?t=${new Date().getTime()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setWatchlist(response.data.data);
+      const watchlistData = Array.isArray(response.data?.data) ? response.data.data : [];
+      setWatchlist(watchlistData);
+      return watchlistData;
     } catch (error) {
       console.error("Gagal mengambil watchlist:", error);
+      return [];
     }
   };
 
   const handleAddWatchlist = async (movieId) => {
     try {
-      // Mengirim berbagai format ID sekaligus untuk memastikan backend menerimanya
       await axios.post('/api/watchlist',
-        { movieId: movieId, movie_id: movieId, id: movieId },
+        { movieId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      // Jika sukses, panggil ulang data terbaru
-      fetchWatchlist();
+      await fetchWatchlist();
     } catch (error) {
       console.error("Error Add Watchlist:", error.response);
       // Ini akan memunculkan pop-up yang memberitahu persis APA alasan backend menolaknya
@@ -375,8 +375,10 @@ function Home() {
               ) : (
                 <button
                   onClick={() => {
-                    setViewMode(viewMode === 'watchlist' ? 'home' : 'watchlist');
+                    const nextViewMode = viewMode === 'watchlist' ? 'home' : 'watchlist';
+                    setViewMode(nextViewMode);
                     setSelectedGenre('All');
+                    if (nextViewMode === 'watchlist') fetchWatchlist();
                   }}
                   style={{
                     backgroundColor: viewMode === 'watchlist' ? theme.primary : 'transparent',
