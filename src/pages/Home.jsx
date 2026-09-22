@@ -17,7 +17,7 @@ function Home() {
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
 
-  const genreOptions = ["All", "Action", "Drama", "Romance", "Horror", "Sci-Fi", "Comedy", "Thriller", "Fantasy", "Documentary", "Animation", "Mystery", "Crime"];
+  const genreOptions = ['All', 'Action', 'Drama', 'Romance', 'Horror', 'Sci-Fi', 'Comedy', 'Thriller', 'Fantasy', 'Documentary', 'Animation', 'Mystery', 'Crime'];
 
   useEffect(() => {
     getMovies(1);
@@ -50,7 +50,9 @@ function Home() {
       const response = await axios.get(`/api/movies/search?q=${searchQuery}`);
       setMovies(response.data.data);
       setHasNextPage(false);
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleGenreChange = async (e) => {
@@ -66,7 +68,9 @@ function Home() {
         const response = await axios.get(`/api/movies/search?q=${g}`);
         setMovies(response.data.data);
         setHasNextPage(false);
-      } catch (error) { console.error(error); }
+      } catch (error) {
+        console.error(error);
+      }
     }
   };
 
@@ -79,21 +83,19 @@ function Home() {
       setWatchlist(watchlistData);
       return watchlistData;
     } catch (error) {
-      console.error("Gagal mengambil watchlist:", error);
+      console.error('Gagal mengambil watchlist:', error);
       return [];
     }
   };
 
   const handleAddWatchlist = async (movieId) => {
     try {
-      await axios.post('/api/watchlist',
-        { movieId },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      await axios.post('/api/watchlist', { movieId }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       await fetchWatchlist();
     } catch (error) {
-      console.error("Error Add Watchlist:", error.response);
-      // Ini akan memunculkan pop-up yang memberitahu persis APA alasan backend menolaknya
+      console.error('Error Add Watchlist:', error.response);
       const pesanError = error.response?.data?.message || error.response?.data?.error || 'Koneksi ke VPS gagal';
       alert(`Gagal menambah: ${pesanError}`);
     }
@@ -106,21 +108,27 @@ function Home() {
       });
       fetchWatchlist();
     } catch (error) {
-      console.error("Error Remove Watchlist:", error.response);
+      console.error('Error Remove Watchlist:', error.response);
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token'); localStorage.removeItem('role'); setWatchlist([]); navigate('/');
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    setWatchlist([]);
+    navigate('/');
   };
 
   const resetToHome = () => {
-    setViewMode('home'); setSelectedGenre('All'); setSearchQuery(''); getMovies(1); window.scrollTo({ top: 0, behavior: 'smooth' });
+    setViewMode('home');
+    setSelectedGenre('All');
+    setSearchQuery('');
+    getMovies(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   let displayMovies = viewMode === 'watchlist' ? watchlist : movies;
 
-  // Premium theme with dark tones and neon accents
   const theme = {
     bgMain: '#080c18',
     bgCard: 'rgba(255,255,255,0.04)',
@@ -192,7 +200,7 @@ function Home() {
 
         .custom-select {
           appearance: none;
-          background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300e676%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+          background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%2[...]
           background-repeat: no-repeat;
           background-position: right 1.2rem top 50%;
           background-size: 0.7rem auto;
@@ -331,7 +339,6 @@ function Home() {
         }
       `}</style>
 
-      {/* NAVBAR */}
       <nav className="nav-blur">
         <h1 className="logo" onClick={resetToHome}>
           ALGMOVIES
@@ -417,7 +424,6 @@ function Home() {
         </div>
       </nav>
 
-      {/* HERO BANNER */}
       {viewMode === 'home' && movies.length > 0 && selectedGenre === 'All' && !searchQuery && (
         <div
           style={{
@@ -527,7 +533,6 @@ function Home() {
         </div>
       )}
 
-      {/* MAIN CONTENT */}
       <div
         style={{
           padding: viewMode === 'home' ? '0 48px 80px' : '40px 48px 80px',
@@ -537,7 +542,6 @@ function Home() {
           flex: 1,
         }}
       >
-        {/* TOP CONTROLS */}
         <div
           style={{
             display: 'flex',
@@ -597,7 +601,6 @@ function Home() {
           )}
         </div>
 
-        {/* MOVIE GRID */}
         {displayMovies.length === 0 ? (
           <div
             style={{
@@ -642,19 +645,13 @@ function Home() {
             }}
           >
             {displayMovies.map((movie) => {
-              // Menangkap ID film dengan tangguh (mengantisipasi kolom id atau movie_id)
               const currentMovieId = movie.id || movie.movie_id;
-
-              // Mencocokkan dengan data watchlist secara akurat
               const watchlistData = watchlist.find((w) => w.id === currentMovieId || w.movie_id === currentMovieId);
               const isInWatchlist = !!watchlistData;
-
-              // Menangkap ID valid untuk proses hapus
               const validWatchlistId = watchlistData ? (watchlistData.watchlist_id || watchlistData.id) : null;
 
               return (
                 <div key={currentMovieId} className="premium-card">
-                  {/* POSTER */}
                   <div style={{ position: 'relative', height: '380px', overflow: 'hidden' }}>
                     {movie.foto ? (
                       <img
@@ -703,7 +700,6 @@ function Home() {
                       {movie.tahun}
                     </span>
 
-                    {/* PLAY OVERLAY */}
                     <Link
                       to={`/movie/${currentMovieId}`}
                       className="play-overlay"
@@ -741,7 +737,6 @@ function Home() {
                     </Link>
                   </div>
 
-                  {/* CARD INFO */}
                   <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <span
                       style={{
@@ -841,7 +836,6 @@ function Home() {
           </div>
         )}
 
-        {/* LOAD MORE */}
         {viewMode === 'home' && hasNextPage && selectedGenre === 'All' && !searchQuery && (
           <div style={{ textAlign: 'center', marginTop: '60px' }}>
             <button
@@ -879,7 +873,6 @@ function Home() {
         )}
       </div>
 
-      {/* FOOTER */}
       <footer
         style={{
           background: '#03060d',

@@ -4,28 +4,22 @@ import { useNavigate, Link } from 'react-router-dom';
 
 function AdminDashboard() {
     const [movies, setMovies] = useState([]);
-
-    // Form State
     const [judul, setJudul] = useState('');
     const [tahun, setTahun] = useState('');
     const [sutradara, setSutradara] = useState('');
     const [deskripsi, setDeskripsi] = useState('');
     const [genre, setGenre] = useState('');
     const [trailerUrl, setTrailerUrl] = useState('');
-
-    // Image Specific State (Two Options)
-    const [image, setImage] = useState(null); // For local file
-    const [imageUrl, setImageUrl] = useState(''); // For Google link
-
+    const [image, setImage] = useState(null);
+    const [imageUrl, setImageUrl] = useState('');
     const [editId, setEditId] = useState(null);
 
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
 
-    // Automatic Genre Category List
     const genreOptions = [
-        "Action", "Drama", "Romance", "Horror", "Sci-Fi",
-        "Comedy", "Thriller", "Fantasy", "Documentary", "Animation", "Mystery", "Crime"
+        'Action', 'Drama', 'Romance', 'Horror', 'Sci-Fi',
+        'Comedy', 'Thriller', 'Fantasy', 'Documentary', 'Animation', 'Mystery', 'Crime'
     ];
 
     useEffect(() => {
@@ -38,16 +32,18 @@ function AdminDashboard() {
             const response = await axios.get('/api/movies');
             setMovies(response.data.data);
         } catch (error) {
-            console.error("Failed to load data:", error);
+            console.error('Failed to load data:', error);
         }
     };
 
     const handleEdit = (movie) => {
-        setJudul(movie.judul); setTahun(movie.tahun); setSutradara(movie.sutradara);
-        setDeskripsi(movie.deskripsi || ''); setGenre(movie.genre || ''); setTrailerUrl(movie.trailer_url || '');
+        setJudul(movie.judul);
+        setTahun(movie.tahun);
+        setSutradara(movie.sutradara);
+        setDeskripsi(movie.deskripsi || '');
+        setGenre(movie.genre || '');
+        setTrailerUrl(movie.trailer_url || '');
         setEditId(movie.id);
-
-        // Reset image form when editing
         setImage(null);
         setImageUrl('');
 
@@ -59,60 +55,99 @@ function AdminDashboard() {
             try {
                 await axios.delete(`/api/movies/${id}`, { headers: { Authorization: `Bearer ${token}` } });
                 fetchMovies();
-            } catch (error) { alert('Failed to delete data.'); }
+            } catch (error) {
+                alert('Failed to delete data.');
+            }
         }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData();
-        formData.append('judul', judul); formData.append('tahun', tahun); formData.append('sutradara', sutradara);
-        formData.append('deskripsi', deskripsi); formData.append('genre', genre); formData.append('trailer_url', trailerUrl);
+        formData.append('judul', judul);
+        formData.append('tahun', tahun);
+        formData.append('sutradara', sutradara);
+        formData.append('deskripsi', deskripsi);
+        formData.append('genre', genre);
+        formData.append('trailer_url', trailerUrl);
 
-        // Send image (File or URL)
         if (image) formData.append('image', image);
         if (imageUrl) formData.append('imageUrl', imageUrl);
 
         try {
             if (editId) {
-                await axios.put(`/api/movies/${editId}`, formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
-                alert('Movie updated!'); setEditId(null);
+                await axios.put(`/api/movies/${editId}`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
+                });
+                alert('Movie updated!');
+                setEditId(null);
             } else {
-                await axios.post('/api/movies', formData, { headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` } });
+                await axios.post('/api/movies', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data', Authorization: `Bearer ${token}` }
+                });
                 alert('Movie added!');
             }
             resetForm();
             fetchMovies();
-        } catch (error) { alert('An error occurred while saving data.'); }
+        } catch (error) {
+            alert('An error occurred while saving data.');
+        }
     };
 
     const resetForm = () => {
-        setJudul(''); setTahun(''); setSutradara(''); setDeskripsi('');
-        setGenre(''); setTrailerUrl(''); setImage(null); setImageUrl(''); setEditId(null);
+        setJudul('');
+        setTahun('');
+        setSutradara('');
+        setDeskripsi('');
+        setGenre('');
+        setTrailerUrl('');
+        setImage(null);
+        setImageUrl('');
+        setEditId(null);
     };
 
     const handleLogout = () => {
-        localStorage.removeItem('token'); localStorage.removeItem('role'); navigate('/');
+        localStorage.removeItem('token');
+        localStorage.removeItem('role');
+        navigate('/');
     };
 
-    const theme = { bgMain: '#0b0f19', bgCard: '#151b2b', primary: '#1db954', textMain: '#ffffff', textMuted: '#94a3b8', border: '#1f2937' };
-    const inputStyle = { width: '100%', padding: '12px', boxSizing: 'border-box', backgroundColor: theme.bgMain, color: theme.textMain, border: `1px solid ${theme.border}`, borderRadius: '6px', outline: 'none' };
+    const theme = {
+        bgMain: '#0b0f19',
+        bgCard: '#151b2b',
+        primary: '#1db954',
+        textMain: '#ffffff',
+        textMuted: '#94a3b8',
+        border: '#1f2937'
+    };
+
+    const inputStyle = {
+        width: '100%',
+        padding: '12px',
+        boxSizing: 'border-box',
+        backgroundColor: theme.bgMain,
+        color: theme.textMain,
+        border: `1px solid ${theme.border}`,
+        borderRadius: '6px',
+        fontSize: '14px',
+        outline: 'none'
+    };
 
     return (
         <div style={{ backgroundColor: theme.bgMain, minHeight: '100vh', color: theme.textMain, fontFamily: "'Inter', sans-serif" }}>
-
-            {/* Top Navbar Dashboard */}
             <div style={{ backgroundColor: theme.bgCard, padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `1px solid ${theme.border}` }}>
-                <h2 style={{ margin: 0, color: theme.primary, letterSpacing: '1px' }}>ALGMOVIES <span style={{ color: theme.textMain, fontSize: '18px', fontWeight: 'normal' }}>| CMS</span></h2>
+                <h2 style={{ margin: 0, color: theme.primary, letterSpacing: '1px' }}>
+                    ALGMOVIES <span style={{ color: theme.textMain, fontSize: '18px', fontWeight: 'normal' }}>| CMS</span>
+                </h2>
                 <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                     <Link to="/" style={{ color: theme.textMuted, textDecoration: 'none', fontWeight: 'bold' }}>View Public Website</Link>
-                    <button onClick={handleLogout} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold' }}>Logout</button>
+                    <button onClick={handleLogout} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '30px', cursor: 'pointer', fontWeight: 'bold' }}>
+                        Logout
+                    </button>
                 </div>
             </div>
 
             <div style={{ padding: '40px', maxWidth: '1200px', margin: '0 auto' }}>
-
-                {/* Form Panel */}
                 <div style={{ backgroundColor: theme.bgCard, padding: '30px', borderRadius: '12px', border: `1px solid ${theme.border}`, marginBottom: '40px' }}>
                     <h3 style={{ marginTop: 0, color: theme.primary }}>{editId ? `✏️ Edit Film ID: ${editId}` : '➕ Add New Movie Catalog'}</h3>
                     <form onSubmit={handleSubmit}>
@@ -123,7 +158,6 @@ function AdminDashboard() {
                             </div>
                             <div>
                                 <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>Select Genre Category</label>
-                                {/* GENRE DROPDOWN CODE */}
                                 <select value={genre} onChange={(e) => setGenre(e.target.value)} required style={inputStyle}>
                                     <option value="" disabled>-- Select Genre --</option>
                                     {genreOptions.map((g, index) => (
@@ -148,10 +182,9 @@ function AdminDashboard() {
 
                         <div style={{ marginBottom: '15px' }}>
                             <label style={{ display: 'block', marginBottom: '5px', color: theme.textMuted }}>Full Synopsis</label>
-                            <textarea rows="3" value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} style={{ ...inputStyle, resize: 'vertical' }}></textarea>
+                            <textarea rows="3" value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} style={{ ...inputStyle, resize: 'vertical' }} />
                         </div>
 
-                        {/* DUAL IMAGE SOURCE CODE */}
                         <div style={{ backgroundColor: '#1e293b', padding: '20px', borderRadius: '8px', border: `1px solid ${theme.border}`, marginBottom: '25px' }}>
                             <label style={{ display: 'block', marginBottom: '15px', color: '#fff', fontWeight: 'bold' }}>🖼️ Poster Image Source (Fill One Only)</label>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
@@ -179,7 +212,6 @@ function AdminDashboard() {
                     </form>
                 </div>
 
-                {/* Data Table Management */}
                 <div style={{ backgroundColor: theme.bgCard, padding: '30px', borderRadius: '12px', border: `1px solid ${theme.border}` }}>
                     <h3 style={{ marginTop: 0, color: theme.textMain }}>Total Database Catalog ({movies.length} Movies)</h3>
                     <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '15px' }}>
@@ -202,15 +234,18 @@ function AdminDashboard() {
                                     <td style={{ padding: '15px' }}><span style={{ backgroundColor: '#374151', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' }}>{m.genre}</span></td>
                                     <td style={{ padding: '15px', color: theme.textMuted }}>{m.tahun}</td>
                                     <td style={{ padding: '15px', textAlign: 'center' }}>
-                                        <button onClick={() => handleEdit(m)} style={{ backgroundColor: '#f59e0b', color: '#000', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', marginRight: '8px', fontWeight: 'bold' }}>Edit</button>
-                                        <button onClick={() => handleDelete(m.id)} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>Delete</button>
+                                        <button onClick={() => handleEdit(m)} style={{ backgroundColor: '#f59e0b', color: '#000', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginRight: '10px' }}>
+                                            Edit
+                                        </button>
+                                        <button onClick={() => handleDelete(m.id)} style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '8px 15px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' }}>
+                                            Delete
+                                        </button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
                 </div>
-
             </div>
         </div>
     );
