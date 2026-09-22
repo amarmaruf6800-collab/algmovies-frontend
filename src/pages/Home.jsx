@@ -437,6 +437,7 @@ function Home() {
             alignItems: 'center',
             justifyContent: 'center',
             padding: '0 20px',
+            overflow: 'hidden',
           }}
         >
           <div
@@ -539,10 +540,14 @@ function Home() {
       <div
         style={{
           padding: viewMode === 'home' ? '0 48px 80px' : '40px 48px 80px',
-          marginTop: viewMode === 'watchlist' ? '0' : '-40px',
+          marginTop: 0,
           position: 'relative',
           zIndex: 10,
           flex: 1,
+          width: '100%',
+          maxWidth: '1400px',
+          marginLeft: 'auto',
+          marginRight: 'auto',
         }}
       >
         <div
