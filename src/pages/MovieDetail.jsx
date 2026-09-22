@@ -14,7 +14,7 @@ function MovieDetail() {
         setMovie(response.data.data);
         setLoading(false);
       } catch (error) {
-        console.error('Failed to fetch movie data:', error);
+        console.error("Failed to fetch movie data:", error);
         setLoading(false);
       }
     };
@@ -25,9 +25,10 @@ function MovieDetail() {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
-    return match && match[2].length === 11 ? `https://www.youtube.com/embed/${match[2]}?autoplay=1` : null;
+    return (match && match[2].length === 11) ? `https://www.youtube.com/embed/${match[2]}?autoplay=1` : null;
   };
 
+  // Premium theme aligned with Home.jsx
   const theme = {
     bgMain: '#0a0e1a',
     bgCard: 'rgba(255,255,255,0.04)',
@@ -246,6 +247,7 @@ function MovieDetail() {
         }
       `}</style>
 
+      {/* NAVBAR */}
       <div className="nav-blur">
         <Link to="/" className="back-btn">
           <span style={{ fontSize: '20px', lineHeight: 1 }}>←</span> Back
@@ -255,9 +257,10 @@ function MovieDetail() {
           ALGMOVIES
         </Link>
 
-        <div style={{ width: '120px' }} />
+        <div style={{ width: '120px' }}></div> {/* Spacer for balance */}
       </div>
 
+      {/* VIDEO FRAME */}
       <div style={{ padding: '32px 40px 20px', backgroundColor: '#05080f' }}>
         <div className="video-frame" style={{ maxWidth: '1200px', margin: '0 auto' }}>
           {movie.trailer_url ? (
@@ -281,6 +284,7 @@ function MovieDetail() {
         </div>
       </div>
 
+      {/* DETAIL INFO */}
       <div
         style={{
           padding: '20px 40px 60px',
@@ -298,6 +302,7 @@ function MovieDetail() {
             alignItems: 'flex-start',
           }}
         >
+          {/* LEFT: Title & Synopsis */}
           <div style={{ flex: '2 1 600px' }}>
             <h1 className="section-title">{movie.judul}</h1>
 
@@ -324,6 +329,7 @@ function MovieDetail() {
             </p>
           </div>
 
+          {/* RIGHT: Crew Info */}
           <div className="info-card" style={{ flex: '1 1 280px' }}>
             <h3
               style={{
