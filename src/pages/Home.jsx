@@ -431,13 +431,16 @@ function Home() {
         <div
           style={{
             position: 'relative',
-            height: '75vh',
-            minHeight: '560px',
+            height: '60vh',
+            minHeight: '480px',
+            maxHeight: '620px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '0 20px',
+            margin: 0,
             overflow: 'hidden',
+            backgroundColor: '#0a1220',
           }}
         >
           <div
@@ -446,7 +449,7 @@ function Home() {
               inset: 0,
               backgroundImage: `url(${movies[0].foto})`,
               backgroundSize: 'cover',
-              backgroundPosition: 'center 30%',
+              backgroundPosition: 'center center',
               filter: 'brightness(0.7) saturate(1.1)',
             }}
           />
@@ -457,7 +460,8 @@ function Home() {
             style={{
               position: 'relative',
               zIndex: 2,
-              maxWidth: '800px',
+              width: '100%',
+              maxWidth: '900px',
               textAlign: 'center',
               padding: '0 20px',
             }}
@@ -467,11 +471,11 @@ function Home() {
               className="hero-title"
               style={{
                 color: '#fff',
-                fontSize: 'clamp(44px, 8vw, 80px)',
+                fontSize: 'clamp(52px, 7vw, 110px)',
                 margin: '20px 0 16px',
-                lineHeight: 1.05,
+                lineHeight: 0.9,
                 fontWeight: 900,
-                letterSpacing: '-2px',
+                letterSpacing: '-3px',
                 textShadow: '0 4px 30px rgba(0,0,0,0.6)',
               }}
             >
@@ -481,10 +485,10 @@ function Home() {
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '12px 20px',
+                gap: '10px 18px',
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginBottom: '24px',
+                marginBottom: '18px',
                 color: theme.textMuted,
                 fontWeight: 500,
                 fontSize: '15px',
@@ -501,17 +505,15 @@ function Home() {
               className="hero-desc"
               style={{
                 color: '#cbd5e1',
-                fontSize: 'clamp(16px, 1.2vw, 20px)',
-                margin: '0 0 40px',
-                lineHeight: 1.7,
-                maxWidth: '600px',
-                marginLeft: 'auto',
-                marginRight: 'auto',
+                fontSize: 'clamp(16px, 1.6vw, 22px)',
+                margin: '0 auto 30px',
+                lineHeight: 1.5,
+                maxWidth: '620px',
                 textShadow: '0 2px 10px rgba(0,0,0,0.6)',
               }}
             >
               {movies[0].deskripsi
-                ? movies[0].deskripsi.substring(0, 200) + '...'
+                ? movies[0].deskripsi.substring(0, 180) + '...'
                 : 'Watch exclusive trailers and explore the best cinema world only on ALGMOVIES.'}
             </p>
             <Link
