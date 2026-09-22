@@ -1,0 +1,190 @@
+# 🎬 ALGMOVIES Frontend
+
+> React frontend for ALGMOVIES, a full-stack movie catalog application with authentication, watchlists, movie discovery, and an admin content management interface.
+
+ALGMOVIES provides a public movie catalog for browsing and searching movies, personal watchlist functionality for authenticated users, and an admin interface for managing the movie catalog.
+
+---
+
+## ✨ Features
+
+### 🎞️ Movie Catalog
+
+- Browse movies from the database
+- Movie detail pages
+- Movie posters
+- Genre information
+- Release year
+- Director
+- Synopsis
+- YouTube trailer playback
+- Genre filtering
+- Keyword search by title or genre
+- Pagination / Load More behavior
+
+### 🔖 Watchlist
+
+- Add movies to a personal watchlist
+- View saved movies
+- Remove movies from the watchlist
+- User-specific watchlist data
+
+### 🔐 Authentication
+
+- User registration
+- User login
+- Admin authentication flow
+- JWT-based authentication
+- Role information
+- Protected routes and features
+
+### 🛠️ Admin CMS
+
+- Admin dashboard
+- Add movies
+- Edit movies
+- Delete movies
+- Select predefined genres
+- Add YouTube trailer URLs
+- Add synopsis and director information
+- Upload movie posters
+- Use external poster URLs
+- Movie catalog management
+
+---
+
+## 🧱 Architecture
+
+```text
+┌─────────────────────────────────┐
+│          React + Vite           │
+│                                 │
+│ Home • Search • Details         │
+│ Login • Watchlist • Admin       │
+└───────────────┬─────────────────┘
+                │
+                │ HTTP / REST API
+                ▼
+┌─────────────────────────────────┐
+│       Node.js + Express         │
+│                                 │
+│ Auth API • Movie API            │
+│ Watchlist API                   │
+└───────────────┬─────────────────┘
+                │
+                ▼
+┌─────────────────────────────────┐
+│       MySQL-compatible DB       │
+└─────────────────────────────────┘
+```
+
+The frontend includes Vercel rewrite configuration so `/api/*` requests can be proxied to the backend.
+
+---
+
+## 🛠️ Tech Stack
+
+- React
+- Vite
+- React Router
+- Axios
+- JavaScript
+- Vercel
+
+---
+
+## 📁 Project Structure
+
+```text
+algmovies-frontend/
+│
+├── src/
+│   ├── pages/
+│   │   ├── Home.jsx
+│   │   ├── MovieDetail.jsx
+│   │   ├── Login.jsx
+│   │   └── AdminDashboard.jsx
+│   │
+│   └── App.jsx
+│
+├── public/
+├── vercel.json
+├── package.json
+└── README.md
+```
+
+---
+
+## 🔑 Backend Integration
+
+The frontend communicates with the ALGMOVIES REST API.
+
+Main API areas:
+
+```text
+Authentication
+Movies
+Movie Search
+Watchlist
+```
+
+Movie management requests are protected by administrator authentication.
+
+---
+
+## 🚀 Run Locally
+
+### Requirements
+
+- Node.js
+- npm
+- Running ALGMOVIES backend
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Start development server
+
+```bash
+npm run dev
+```
+
+Configure the API endpoint according to the local backend environment.
+
+---
+
+## 🔐 Environment
+
+Do not commit production credentials or private configuration to GitHub.
+
+Use environment-specific configuration for API URLs and other deployment settings.
+
+---
+
+## 📌 Project Highlights
+
+ALGMOVIES frontend demonstrates:
+
+- React component architecture
+- Client-side routing
+- REST API integration
+- Authentication flow
+- Protected admin interface
+- Search and filtering
+- Pagination / Load More
+- Personal watchlist
+- Responsive movie catalog UI
+- Production-oriented Vercel configuration
+
+---
+
+## 👨‍💻 Author
+
+**Amar**
+
+Junior Web Developer | Full-Stack Enthusiast
+
+Information Technology / Web Development
