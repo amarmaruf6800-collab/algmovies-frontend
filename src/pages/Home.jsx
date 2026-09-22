@@ -72,27 +72,28 @@ function Home() {
 
   const fetchWatchlist = async () => {
     try {
+      // Tambahkan ?t=... (Anti-Cache) agar Vercel selalu mengambil data terbaru dari VPS BiznetGio, bukan data usang
       const response = await axios.get(`/api/watchlist?t=${new Date().getTime()}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      const watchlistData = Array.isArray(response.data?.data) ? response.data.data : [];
-      setWatchlist(watchlistData);
-      return watchlistData;
+      setWatchlist(response.data.data);
     } catch (error) {
       console.error("Gagal mengambil watchlist:", error);
-      return [];
     }
   };
 
   const handleAddWatchlist = async (movieId) => {
     try {
+      // Mengirim berbagai format ID sekaligus untuk memastikan backend menerimanya
       await axios.post('/api/watchlist',
-        { movieId },
+        { movieId: movieId, movie_id: movieId, id: movieId },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      await fetchWatchlist();
+      // Jika sukses, panggil ulang data terbaru
+      fetchWatchlist();
     } catch (error) {
       console.error("Error Add Watchlist:", error.response);
+      // Ini akan memunculkan pop-up yang memberitahu persis APA alasan backend menolaknya
       const pesanError = error.response?.data?.message || error.response?.data?.error || 'Koneksi ke VPS gagal';
       alert(`Gagal menambah: ${pesanError}`);
     }
@@ -119,6 +120,7 @@ function Home() {
 
   let displayMovies = viewMode === 'watchlist' ? watchlist : movies;
 
+  // Premium theme with dark tones and neon accents
   const theme = {
     bgMain: '#080c18',
     bgCard: 'rgba(255,255,255,0.04)',
@@ -164,12 +166,6 @@ function Home() {
           box-shadow: 0 20px 40px -12px rgba(0, 230, 118, 0.2);
         }
 
-        .movie-grid {
-          display: grid;
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          gap: 32px;
-        }
-
         .play-overlay {
           opacity: 0;
           transition: opacity 0.4s ease;
@@ -196,7 +192,7 @@ function Home() {
 
         .custom-select {
           appearance: none;
-          background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%2[...]
+          background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300e676%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
           background-repeat: no-repeat;
           background-position: right 1.2rem top 50%;
           background-size: 0.7rem auto;
@@ -324,10 +320,7 @@ function Home() {
           color: ${theme.textMain};
         }
 
-        @media (max-width: 1024px) {
-          .movie-grid {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-          }
+        @media (max-width: 768px) {
           .nav-blur { padding: 12px 20px; flex-wrap: wrap; gap: 12px; }
           .logo { font-size: 24px; }
           .hero-title { font-size: 40px !important; }
@@ -336,16 +329,13 @@ function Home() {
           .input-premium { width: 150px; }
           .custom-select { min-width: 140px; }
         }
-
-        @media (max-width: 640px) {
-          .movie-grid {
-            grid-template-columns: 1fr;
-          }
-        }
       `}</style>
 
+      {/* NAVBAR */}
       <nav className="nav-blur">
-        <h1 className="logo" onClick={resetToHome}>ALGMOVIES</h1>
+        <h1 className="logo" onClick={resetToHome}>
+          ALGMOVIES
+        </h1>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           {!token ? (
             <Link
@@ -385,10 +375,8 @@ function Home() {
               ) : (
                 <button
                   onClick={() => {
-                    const nextViewMode = viewMode === 'watchlist' ? 'home' : 'watchlist';
-                    setViewMode(nextViewMode);
+                    setViewMode(viewMode === 'watchlist' ? 'home' : 'watchlist');
                     setSelectedGenre('All');
-                    if (nextViewMode === 'watchlist') fetchWatchlist();
                   }}
                   style={{
                     backgroundColor: viewMode === 'watchlist' ? theme.primary : 'transparent',
@@ -427,20 +415,17 @@ function Home() {
         </div>
       </nav>
 
+      {/* HERO BANNER */}
       {viewMode === 'home' && movies.length > 0 && selectedGenre === 'All' && !searchQuery && (
         <div
           style={{
             position: 'relative',
-            height: '60vh',
-            minHeight: '480px',
-            maxHeight: '620px',
+            height: '75vh',
+            minHeight: '560px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             padding: '0 20px',
-            margin: 0,
-            overflow: 'hidden',
-            backgroundColor: '#0a1220',
           }}
         >
           <div
@@ -449,7 +434,7 @@ function Home() {
               inset: 0,
               backgroundImage: `url(${movies[0].foto})`,
               backgroundSize: 'cover',
-              backgroundPosition: 'center center',
+              backgroundPosition: 'center 30%',
               filter: 'brightness(0.7) saturate(1.1)',
             }}
           />
@@ -460,8 +445,7 @@ function Home() {
             style={{
               position: 'relative',
               zIndex: 2,
-              width: '100%',
-              maxWidth: '900px',
+              maxWidth: '800px',
               textAlign: 'center',
               padding: '0 20px',
             }}
@@ -471,11 +455,11 @@ function Home() {
               className="hero-title"
               style={{
                 color: '#fff',
-                fontSize: 'clamp(52px, 7vw, 110px)',
+                fontSize: 'clamp(44px, 8vw, 80px)',
                 margin: '20px 0 16px',
-                lineHeight: 0.9,
+                lineHeight: 1.05,
                 fontWeight: 900,
-                letterSpacing: '-3px',
+                letterSpacing: '-2px',
                 textShadow: '0 4px 30px rgba(0,0,0,0.6)',
               }}
             >
@@ -485,10 +469,10 @@ function Home() {
               style={{
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '10px 18px',
+                gap: '12px 20px',
                 justifyContent: 'center',
                 alignItems: 'center',
-                marginBottom: '18px',
+                marginBottom: '24px',
                 color: theme.textMuted,
                 fontWeight: 500,
                 fontSize: '15px',
@@ -505,15 +489,17 @@ function Home() {
               className="hero-desc"
               style={{
                 color: '#cbd5e1',
-                fontSize: 'clamp(16px, 1.6vw, 22px)',
-                margin: '0 auto 30px',
-                lineHeight: 1.5,
-                maxWidth: '620px',
+                fontSize: 'clamp(16px, 1.2vw, 20px)',
+                margin: '0 0 40px',
+                lineHeight: 1.7,
+                maxWidth: '600px',
+                marginLeft: 'auto',
+                marginRight: 'auto',
                 textShadow: '0 2px 10px rgba(0,0,0,0.6)',
               }}
             >
               {movies[0].deskripsi
-                ? movies[0].deskripsi.substring(0, 180) + '...'
+                ? movies[0].deskripsi.substring(0, 200) + '...'
                 : 'Watch exclusive trailers and explore the best cinema world only on ALGMOVIES.'}
             </p>
             <Link
@@ -539,19 +525,17 @@ function Home() {
         </div>
       )}
 
+      {/* MAIN CONTENT */}
       <div
         style={{
           padding: viewMode === 'home' ? '0 48px 80px' : '40px 48px 80px',
-          marginTop: 0,
+          marginTop: viewMode === 'watchlist' ? '0' : '-40px',
           position: 'relative',
           zIndex: 10,
           flex: 1,
-          width: '100%',
-          maxWidth: '1400px',
-          marginLeft: 'auto',
-          marginRight: 'auto',
         }}
       >
+        {/* TOP CONTROLS */}
         <div
           style={{
             display: 'flex',
@@ -611,6 +595,7 @@ function Home() {
           )}
         </div>
 
+        {/* MOVIE GRID */}
         {displayMovies.length === 0 ? (
           <div
             style={{
@@ -647,15 +632,27 @@ function Home() {
             </button>
           </div>
         ) : (
-          <div className="movie-grid" style={{ gap: '32px' }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: '32px',
+            }}
+          >
             {displayMovies.map((movie) => {
+              // Menangkap ID film dengan tangguh (mengantisipasi kolom id atau movie_id)
               const currentMovieId = movie.id || movie.movie_id;
+
+              // Mencocokkan dengan data watchlist secara akurat
               const watchlistData = watchlist.find((w) => w.id === currentMovieId || w.movie_id === currentMovieId);
               const isInWatchlist = !!watchlistData;
+
+              // Menangkap ID valid untuk proses hapus
               const validWatchlistId = watchlistData ? (watchlistData.watchlist_id || watchlistData.id) : null;
 
               return (
                 <div key={currentMovieId} className="premium-card">
+                  {/* POSTER */}
                   <div style={{ position: 'relative', height: '380px', overflow: 'hidden' }}>
                     {movie.foto ? (
                       <img
@@ -704,6 +701,7 @@ function Home() {
                       {movie.tahun}
                     </span>
 
+                    {/* PLAY OVERLAY */}
                     <Link
                       to={`/movie/${currentMovieId}`}
                       className="play-overlay"
@@ -741,6 +739,7 @@ function Home() {
                     </Link>
                   </div>
 
+                  {/* CARD INFO */}
                   <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                     <span
                       style={{
@@ -840,6 +839,7 @@ function Home() {
           </div>
         )}
 
+        {/* LOAD MORE */}
         {viewMode === 'home' && hasNextPage && selectedGenre === 'All' && !searchQuery && (
           <div style={{ textAlign: 'center', marginTop: '60px' }}>
             <button
@@ -877,6 +877,7 @@ function Home() {
         )}
       </div>
 
+      {/* FOOTER */}
       <footer
         style={{
           background: '#03060d',
